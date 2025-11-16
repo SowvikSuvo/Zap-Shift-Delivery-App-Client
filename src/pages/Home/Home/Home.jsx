@@ -3,6 +3,11 @@ import Banner from "../Banner/Banner";
 import HowItWorks from "../../../components/HowItWorks ";
 import Services from "../../../components/Services";
 import Brands from "../Brands/Brands";
+import Features from "../../../components/Features";
+import PromoSection from "../../../components/PromoSection";
+import Reviews from "../Reviews/Reviews";
+
+const reviewsPromise = fetch("/reviews.json").then((res) => res.json());
 
 const Home = () => {
   return (
@@ -11,6 +16,9 @@ const Home = () => {
       <HowItWorks></HowItWorks>
       <Services></Services>
       <Brands></Brands>
+      <Features></Features>
+      <PromoSection></PromoSection>
+      <Reviews reviewsPromise={reviewsPromise}></Reviews>
     </div>
   );
 };
