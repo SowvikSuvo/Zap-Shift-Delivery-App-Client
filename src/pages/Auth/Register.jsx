@@ -4,10 +4,11 @@ import useAuth from "../../hooks/useAuth";
 import { Link } from "react-router";
 import { FcGoogle } from "react-icons/fc";
 import SocialLogin from "./SocialLogin";
+import axios from "axios";
 
 const Register = () => {
   // const { registerUser } = useAuth();
-  const { registerUser } = useAuth();
+  const { registerUser, updateUserProfile } = useAuth();
   const {
     register,
     handleSubmit,
@@ -15,10 +16,38 @@ const Register = () => {
   } = useForm();
 
   const handleRegistration = (data) => {
-    console.log("after register", data);
+    console.log("after register", data.photo[0]);
+    const profileImg = data.photo[0];
+
     registerUser(data.email, data.password)
       .then((result) => {
         console.log(result.user);
+        // store the image and get the photo url
+        const formData = new FormData();
+        formData.append("image", profileImg);
+        const image_API_URL = `https://api.imgbb.com/1/upload?key=${
+          import.meta.env.VITE_image_host_Key
+        }`;
+        axios
+          .post(image_API_URL, formData)
+          .then((res) => {
+            console.log("  after image upload", res.data.data.url);
+            // update user profile here
+            const userProfile = {
+              displayName: data.name,
+              photoURL: res.data.data.url,
+            };
+            updateUserProfile(userProfile)
+              .then(() => {
+                console.log("user profile updated done");
+              })
+              .catch((error) => {
+                console.log(error);
+              });
+          })
+          .catch((err) => {
+            console.log("Image upload error:", err);
+          });
       })
       .catch((error) => {
         console.log(error);
@@ -31,8 +60,35 @@ const Register = () => {
         Create an Account
       </h1>
       <p className="font-medium text-center">Register with ZapShift</p>
-      <form className="card-body -mb-5" onSubmit={handleSubmit(handleRegistration)}>
+      <form
+        className="card-body -mb-5"
+        onSubmit={handleSubmit(handleRegistration)}
+      >
         <fieldset className="fieldset">
+          {/* name */}
+          <label className="label">Name</label>
+          <input
+            type="text"
+            {...register("name", { required: true })}
+            className="input"
+            placeholder="Your Name"
+          />
+          {errors.name?.type === "required" && (
+            <p className="text-red-500">Name is required </p>
+          )}
+          {/* Photo image  */}
+          <label className="label">Photo</label>
+          <input
+            type="file"
+            {...register("photo", { required: true })}
+            className="file-input"
+            placeholder="Upload your photo"
+          />
+          {errors.photo?.type === "required" && (
+            <p className="text-red-500">Photo is required </p>
+          )}
+
+          {/* email */}
           <label className="label">Email</label>
           <input
             type="email"
