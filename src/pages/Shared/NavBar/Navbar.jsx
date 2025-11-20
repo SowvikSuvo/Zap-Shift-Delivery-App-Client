@@ -21,6 +21,9 @@ const Navbar = () => {
         <NavLink to="/about-us">About Us</NavLink>
       </li>
       <li>
+        <NavLink to="/send-parcel">Send Parcel</NavLink>
+      </li>
+      <li>
         <NavLink to="/coverage">Coverage</NavLink>
       </li>
     </>
@@ -72,7 +75,7 @@ const Navbar = () => {
             Log in
           </Link>
         )}
-        <Link className="btn btn-primary text-black mx-4" to="/beARider">
+        <Link className="btn btn-primary text-black mx-4" to="/rider">
           Be a rider
         </Link>
       </div>
