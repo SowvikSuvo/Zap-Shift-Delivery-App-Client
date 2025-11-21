@@ -1,14 +1,19 @@
 import React from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { useLoaderData } from "react-router";
+import Swal from "sweetalert2";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
+import useAuth from "../../hooks/useAuth";
 
 const SendParcel = () => {
   const {
     register,
     handleSubmit,
     control,
-    formState: { errors },
+    // formState: { errors },
   } = useForm();
+  const { user } = useAuth();
+  const axiosSecure = useAxiosSecure();
   const serviceCenters = useLoaderData();
   const regionsDuplicate = serviceCenters.map((c) => c.region);
   const regions = [...new Set(regionsDuplicate)];
@@ -23,6 +28,48 @@ const SendParcel = () => {
 
   const handleSendParcel = (data) => {
     console.log(data);
+    const isDocument = data.parcelType === "document";
+    const isSameDistricts = data.senderDistrict === data.receiverDistrict;
+    const parcelWeight = parseFloat(data.parcelWeight);
+
+    let cost = 0;
+    if (isDocument) {
+      cost = isSameDistricts ? 60 : 80;
+    } else {
+      if (parcelWeight < 3) {
+        cost = isSameDistricts ? 110 : 150;
+      } else {
+        const minCharge = isSameDistricts ? 110 : 150;
+        const extraWeight = parcelWeight - 3;
+        const extraCharge = isSameDistricts
+          ? extraWeight * 40
+          : extraWeight * 40 + 40;
+        cost = minCharge + extraCharge;
+      }
+    }
+    console.log("cost", cost);
+    Swal.fire({
+      title: "Agree with the Cost?",
+      text: `You will be charged ${cost} taka!`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "I agree!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // save the parcel info to the database
+        axiosSecure.post("/parcels", data).then((res) => {
+          console.log("after saving parcel", res.data);
+        });
+
+        // Swal.fire({
+        //   title: "Deleted!",
+        //   text: "Your file has been deleted.",
+        //   icon: "success",
+        // });
+      }
+    });
   };
   return (
     <div className="w-full max-w-6xl mx-auto p-4 md:p-10">
@@ -90,15 +137,18 @@ const SendParcel = () => {
             <div>
               <h2 className="text-xl font-extrabold mb-4">Sender Details</h2>
 
+              {/* sender name */}
               <div className="flex flex-col gap-5">
                 <div>
-                  <label className="block mb-1 font-medium">Parcel Name</label>
+                  <label className="block mb-1 font-medium">Sender Name</label>
                   <input
                     type="text"
-                    {...register("parcelName")}
-                    placeholder="Parcel Name"
+                    {...register("senderName")}
+                    defaultValue={user?.displayName}
+                    placeholder="Sender Name"
                     className="border rounded-lg p-3 w-full"
                   />
+                  {/* sender email */}
                   <div className="mt-5">
                     <label className="block mb-1 font-medium">
                       Sender Email
@@ -106,6 +156,7 @@ const SendParcel = () => {
                     <input
                       type="email"
                       {...register("senderEmail")}
+                      defaultValue={user?.email}
                       placeholder="Sender Email"
                       className="border rounded-lg p-3 w-full"
                     />
@@ -113,7 +164,9 @@ const SendParcel = () => {
                 </div>
 
                 <div>
-                  <label className="block mb-1 font-medium">Address</label>
+                  <label className="block mb-1 font-medium">
+                    Sender Address
+                  </label>
                   <input
                     type="text"
                     {...register("senderAddress")}
@@ -136,6 +189,25 @@ const SendParcel = () => {
 
                 {/* sender region */}
                 <div>
+                  <fieldset className="fieldset">
+                    <legend className="fieldset-legend text-[15px] font-medium">
+                      Sender Regions
+                    </legend>
+                    <select
+                      {...register("senderRegion")}
+                      defaultValue="Pick a region"
+                      className="select outline text-[15px]"
+                    >
+                      <option disabled={true}>Pick a region</option>
+                      {regions.map((r, i) => (
+                        <option key={i} value={r}>
+                          {r}
+                        </option>
+                      ))}
+                    </select>
+                  </fieldset>
+                </div>
+                {/* <div>
                   <label className="block mb-1 font-medium">
                     Sender Regions
                   </label>
@@ -152,10 +224,31 @@ const SendParcel = () => {
                       </option>
                     ))}
                   </select>
-                </div>
+                </div> */}
 
                 {/* sender districts */}
                 <div>
+                  <fieldset className="fieldset ">
+                    <legend className="fieldset-legend text-[15px] font-medium ">
+                      Sender Districts
+                    </legend>
+                    <select
+                      {...register("senderDistrict")}
+                      defaultValue=""
+                      className=" select outline text-[15px] "
+                    >
+                      <option value="" disabled>
+                        Pick a District
+                      </option>
+                      {districtsByRegion(senderRegion).map((r, i) => (
+                        <option key={i} value={r}>
+                          {r}
+                        </option>
+                      ))}
+                    </select>
+                  </fieldset>
+                </div>
+                {/* <div>
                   <label className="block mb-1 font-medium">
                     Sender Districts
                   </label>
@@ -172,7 +265,7 @@ const SendParcel = () => {
                       </option>
                     ))}
                   </select>
-                </div>
+                </div> */}
 
                 <div>
                   <label className="block mb-1 font-medium">
@@ -241,6 +334,27 @@ const SendParcel = () => {
 
                 {/* Receiver region */}
                 <div>
+                  <fieldset className="fieldset">
+                    <legend className="fieldset-legend text-[15px] font-medium ">
+                      Receiver Regions
+                    </legend>
+                    <select
+                      {...register("receiverRegion")}
+                      defaultValue=""
+                      className=" select outline text-[15px]"
+                    >
+                      <option value="" disabled={true}>
+                        Pick a region
+                      </option>
+                      {regions.map((r, i) => (
+                        <option key={i} value={r}>
+                          {r}
+                        </option>
+                      ))}
+                    </select>
+                  </fieldset>
+                </div>
+                {/* <div>
                   <label className="block mb-1 font-medium">
                     Receiver Regions
                   </label>
@@ -257,10 +371,29 @@ const SendParcel = () => {
                       </option>
                     ))}
                   </select>
-                </div>
+                </div> */}
 
                 {/* Receiver districts */}
                 <div>
+                  <fieldset className="fieldset">
+                    <legend className="fieldset-legend text-[15px] font-medium ">
+                      Receiver District
+                    </legend>
+                    <select
+                      {...register("receiverDistrict")}
+                      defaultValue="Pick a District"
+                      className=" select outline text-[15px]"
+                    >
+                      <option disabled={true}>Pick a District</option>
+                      {districtsByRegion(receiverRegion).map((d, i) => (
+                        <option key={i} value={d}>
+                          {d}
+                        </option>
+                      ))}
+                    </select>
+                  </fieldset>
+                </div>
+                {/* <div>
                   <label className="block mb-1 font-medium">
                     Receiver District
                   </label>
@@ -277,7 +410,7 @@ const SendParcel = () => {
                       </option>
                     ))}
                   </select>
-                </div>
+                </div> */}
 
                 <div>
                   <label className="block mb-1 font-medium">
