@@ -1,19 +1,50 @@
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { motion } from "framer-motion";
 import riderImg from "../../assets/agent-pending.png";
+import useAuth from "../../hooks/useAuth";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
+import { useLoaderData } from "react-router";
+import Swal from "sweetalert2";
 
 const Rider = () => {
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm();
+  const serviceCenters = useLoaderData();
+  const regionsDuplicate = serviceCenters.map((c) => c.region);
+  const regions = [...new Set(regionsDuplicate)];
+
+  const districtsByRegion = (region) => {
+    const regionDistricts = serviceCenters.filter((c) => c.region === region);
+    const districts = regionDistricts.map((d) => d.district);
+    return districts;
+  };
+
+  const riderRegion = useWatch({ control, name: "region" });
+
   const [submitted, setSubmitted] = useState(false);
+  const { user } = useAuth();
+  const axiosSecure = useAxiosSecure();
 
   const onSubmit = (data) => {
     console.log(data);
     setSubmitted(true);
+    axiosSecure.post("/riders", data).then((res) => {
+      if (res.data.insertedId) {
+        Swal.fire({
+          position: "top-end",
+          icon: "success",
+          title:
+            " Your application has been submitted. We will reach out you in 15 days",
+          showConfirmButton: false,
+          timer: 2000,
+        });
+      }
+    });
   };
 
   const inputVariant = {
@@ -57,11 +88,13 @@ const Rider = () => {
               <div className="flex space-x-4">
                 <div className="w-1/2">
                   <label className="block mb-1 font-medium text-gray-700">
-                    Name
+                    Your Name
                   </label>
                   <motion.input
                     {...register("name", { required: true })}
                     placeholder="Your Name"
+                    defaultValue={user?.displayName}
+                    type="text"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
                     variants={inputVariant}
                     initial="hidden"
@@ -72,7 +105,7 @@ const Rider = () => {
                 </div>
                 <div className="w-1/2">
                   <label className="block mb-1 font-medium text-gray-700">
-                    Age
+                    Your Age
                   </label>
                   <motion.input
                     {...register("age", { required: true, min: 18 })}
@@ -89,143 +122,156 @@ const Rider = () => {
               </div>
 
               {/* Email & District */}
-              <div className="flex space-x-4">
-                <div className="w-1/2">
-                  <label className="block mb-1 font-medium text-gray-700">
-                    Email
-                  </label>
-                  <motion.input
-                    {...register("email", { required: true })}
-                    placeholder="Your Email"
-                    type="email"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
-                    variants={inputVariant}
-                    initial="hidden"
-                    animate="visible"
-                    whileFocus="focus"
-                    transition={{ duration: 0.3, delay: 0.1 }}
-                  />
-                </div>
-                <div className="w-1/2">
-                  <label className="block mb-1 font-medium text-gray-700">
-                    District
-                  </label>
-                  <motion.select
-                    {...register("district", { required: true })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
-                    variants={inputVariant}
-                    initial="hidden"
-                    animate="visible"
-                    whileFocus="focus"
-                    transition={{ duration: 0.3, delay: 0.15 }}
-                  >
-                    <option value="">Select your District</option>
-                    <option value="Bagerhat">Bagerhat</option>
-                    <option value="Bandarban">Bandarban</option>
-                    <option value="Barguna">Barguna</option>
-                    <option value="Barisal">Barisal</option>
-                    <option value="Bhola">Bhola</option>
-                    <option value="Bogura">Bogura</option>
-                    <option value="Brahmanbaria">Brahmanbaria</option>
-                    <option value="Chandpur">Chandpur</option>
-                    <option value="Chattogram">Chattogram</option>
-                    <option value="Chuadanga">Chuadanga</option>
-                    <option value="Comilla">Comilla</option>
-                    <option value="Cox's Bazar">Cox's Bazar</option>
-                    <option value="Dhaka">Dhaka</option>
-                    <option value="Dinajpur">Dinajpur</option>
-                    <option value="Faridpur">Faridpur</option>
-                    <option value="Feni">Feni</option>
-                    <option value="Gaibandha">Gaibandha</option>
-                    <option value="Gazipur">Gazipur</option>
-                    <option value="Gopalganj">Gopalganj</option>
-                    <option value="Habiganj">Habiganj</option>
-                    <option value="Jamalpur">Jamalpur</option>
-                    <option value="Jashore">Jashore</option>
-                    <option value="Jhalokati">Jhalokati</option>
-                    <option value="Jhenaidah">Jhenaidah</option>
-                    <option value="Joypurhat">Joypurhat</option>
-                    <option value="Khagrachhari">Khagrachhari</option>
-                    <option value="Khulna">Khulna</option>
-                    <option value="Kishoreganj">Kishoreganj</option>
-                    <option value="Kurigram">Kurigram</option>
-                    <option value="Kushtia">Kushtia</option>
-                    <option value="Lakshmipur">Lakshmipur</option>
-                    <option value="Lalmonirhat">Lalmonirhat</option>
-                    <option value="Madaripur">Madaripur</option>
-                    <option value="Magura">Magura</option>
-                    <option value="Manikganj">Manikganj</option>
-                    <option value="Meherpur">Meherpur</option>
-                    <option value="Moulvibazar">Moulvibazar</option>
-                    <option value="Munshiganj">Munshiganj</option>
-                    <option value="Mymensingh">Mymensingh</option>
-                    <option value="Naogaon">Naogaon</option>
-                    <option value="Narail">Narail</option>
-                    <option value="Narayanganj">Narayanganj</option>
-                    <option value="Narsingdi">Narsingdi</option>
-                    <option value="Natore">Natore</option>
-                    <option value="Nawabganj">Nawabganj</option>
-                    <option value="Netrokona">Netrokona</option>
-                    <option value="Nilphamari">Nilphamari</option>
-                    <option value="Noakhali">Noakhali</option>
-                    <option value="Pabna">Pabna</option>
-                    <option value="Panchagarh">Panchagarh</option>
-                    <option value="Patuakhali">Patuakhali</option>
-                    <option value="Pirojpur">Pirojpur</option>
-                    <option value="Rajbari">Rajbari</option>
-                    <option value="Rajshahi">Rajshahi</option>
-                    <option value="Rangamati">Rangamati</option>
-                    <option value="Rangpur">Rangpur</option>
-                    <option value="Satkhira">Satkhira</option>
-                    <option value="Shariatpur">Shariatpur</option>
-                    <option value="Sherpur">Sherpur</option>
-                    <option value="Sirajganj">Sirajganj</option>
-                    <option value="Sunamganj">Sunamganj</option>
-                    <option value="Sylhet">Sylhet</option>
-                    <option value="Tangail">Tangail</option>
-                    <option value="Thakurgaon">Thakurgaon</option>
-                  </motion.select>
-                </div>
+              <div className="w-1/2">
+                <label className="block mb-1 font-medium text-gray-700">
+                  Your Region
+                </label>
+                <motion.select
+                  {...register("region", { required: true })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
+                  defaultValue="Pick a region"
+                  variants={inputVariant}
+                  initial="hidden"
+                  animate="visible"
+                  whileFocus="focus"
+                  transition={{ duration: 0.3, delay: 0.15 }}
+                >
+                  <option disabled={true}>Pick a region</option>
+                  {regions.map((r, i) => (
+                    <option key={i} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                </motion.select>
               </div>
 
+              <div className="w-1/2">
+                <label className="block mb-1 font-medium text-gray-700">
+                  Your District
+                </label>
+                <motion.select
+                  {...register("district", { required: true })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
+                  defaultValue=""
+                  variants={inputVariant}
+                  initial="hidden"
+                  animate="visible"
+                  whileFocus="focus"
+                  transition={{ duration: 0.3, delay: 0.15 }}
+                >
+                  <option value="" disabled>
+                    Pick a District
+                  </option>
+                  {districtsByRegion(riderRegion).map((r, i) => (
+                    <option key={i} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                </motion.select>
+              </div>
+              <div className="">
+                <label className="block mb-1 font-medium text-gray-700">
+                  Contact
+                </label>
+                <motion.input
+                  {...register("contact", { required: true })}
+                  placeholder="Contact"
+                  type="number"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
+                  variants={inputVariant}
+                  initial="hidden"
+                  animate="visible"
+                  whileFocus="focus"
+                  transition={{ duration: 0.3, delay: 0.25 }}
+                />
+              </div>
+
+              <div className="">
+                <label className="block mb-1 font-medium text-gray-700">
+                  Your Email
+                </label>
+                <motion.input
+                  {...register("email", { required: true })}
+                  placeholder="Your Email"
+                  type="email"
+                  defaultValue={user?.email}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
+                  variants={inputVariant}
+                  initial="hidden"
+                  animate="visible"
+                  whileFocus="focus"
+                  transition={{ duration: 0.3, delay: 0.1 }}
+                />
+              </div>
               {/* NID & Contact */}
-              <div className="flex space-x-4">
-                <div className="w-1/2">
-                  <label className="block mb-1 font-medium text-gray-700">
-                    NID No
-                  </label>
-                  <motion.input
-                    {...register("nid", { required: true })}
-                    placeholder="NID No"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
-                    variants={inputVariant}
-                    initial="hidden"
-                    animate="visible"
-                    whileFocus="focus"
-                    transition={{ duration: 0.3, delay: 0.2 }}
-                  />
-                </div>
-                <div className="w-1/2">
-                  <label className="block mb-1 font-medium text-gray-700">
-                    Contact
-                  </label>
-                  <motion.input
-                    {...register("contact", { required: true })}
-                    placeholder="Contact"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
-                    variants={inputVariant}
-                    initial="hidden"
-                    animate="visible"
-                    whileFocus="focus"
-                    transition={{ duration: 0.3, delay: 0.25 }}
-                  />
-                </div>
+              <div className="">
+                <label className="block mb-1 font-medium text-gray-700">
+                  NID No
+                </label>
+                <motion.input
+                  {...register("nid", { required: true })}
+                  placeholder="NID No"
+                  type="number"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
+                  variants={inputVariant}
+                  initial="hidden"
+                  animate="visible"
+                  whileFocus="focus"
+                  transition={{ duration: 0.3, delay: 0.2 }}
+                />
+              </div>
+              <div className="">
+                <label className="block mb-1 font-medium text-gray-700">
+                  Driving Licence Number
+                </label>
+                <motion.input
+                  {...register("drivingLicense", { required: true })}
+                  placeholder="Driving License Number"
+                  type="number"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
+                  variants={inputVariant}
+                  initial="hidden"
+                  animate="visible"
+                  whileFocus="focus"
+                  transition={{ duration: 0.3, delay: 0.2 }}
+                />
+              </div>
+              <div className="">
+                <label className="block mb-1 font-medium text-gray-700">
+                  Bike Brand Model & Year
+                </label>
+                <motion.input
+                  {...register("bikeInfo", { required: true })}
+                  placeholder="Bike Brand Model & Year"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
+                  variants={inputVariant}
+                  initial="hidden"
+                  animate="visible"
+                  whileFocus="focus"
+                  transition={{ duration: 0.3 }}
+                />
+              </div>
+              <div className="">
+                <label className="block mb-1 font-medium text-gray-700">
+                  Bike Registration Number
+                </label>
+                <motion.input
+                  {...register("bikeRegNum", { required: true })}
+                  placeholder="Bike Registration Number"
+                  type="number"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
+                  variants={inputVariant}
+                  initial="hidden"
+                  animate="visible"
+                  whileFocus="focus"
+                  transition={{ duration: 0.3 }}
+                />
               </div>
 
               {/* Wirehouse */}
               <div>
                 <label className="block mb-1 font-medium text-gray-700">
-                  Wire-house
+                  Which wire-house you want to work?
                 </label>
                 <motion.select
                   {...register("wirehouse", { required: true })}
@@ -241,6 +287,22 @@ const Rider = () => {
                   <option value="House B">House B</option>
                 </motion.select>
               </div>
+              <div className="">
+                <label className="block mb-1 font-medium text-gray-700">
+                  Tell Us about Yourself
+                </label>
+                <motion.input
+                  {...register("riderBio", { required: true })}
+                  placeholder="Tell Us about Yourself"
+                  type="text"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
+                  variants={inputVariant}
+                  initial="hidden"
+                  animate="visible"
+                  whileFocus="focus"
+                  transition={{ duration: 0.3 }}
+                />
+              </div>
 
               <motion.button
                 type="submit"
@@ -251,7 +313,7 @@ const Rider = () => {
                 whileHover="hover"
                 transition={{ duration: 0.3, delay: 0.35 }}
               >
-                Submit
+                Apply as a Rider
               </motion.button>
             </form>
           </div>
