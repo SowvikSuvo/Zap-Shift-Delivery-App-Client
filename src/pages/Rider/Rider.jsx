@@ -171,23 +171,6 @@ const Rider = () => {
               </div>
               <div className="">
                 <label className="block mb-1 font-medium text-gray-700">
-                  Contact
-                </label>
-                <motion.input
-                  {...register("contact", { required: true })}
-                  placeholder="Contact"
-                  type="number"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
-                  variants={inputVariant}
-                  initial="hidden"
-                  animate="visible"
-                  whileFocus="focus"
-                  transition={{ duration: 0.3, delay: 0.25 }}
-                />
-              </div>
-
-              <div className="">
-                <label className="block mb-1 font-medium text-gray-700">
                   Your Email
                 </label>
                 <motion.input
@@ -203,6 +186,23 @@ const Rider = () => {
                   transition={{ duration: 0.3, delay: 0.1 }}
                 />
               </div>
+              <div className="">
+                <label className="block mb-1 font-medium text-gray-700">
+                  Contact
+                </label>
+                <motion.input
+                  {...register("contact", { required: true })}
+                  placeholder="Contact"
+                  type="number"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
+                  variants={inputVariant}
+                  initial="hidden"
+                  animate="visible"
+                  whileFocus="focus"
+                  transition={{ duration: 0.3, delay: 0.25 }}
+                />
+              </div>
+
               {/* NID & Contact */}
               <div className="">
                 <label className="block mb-1 font-medium text-gray-700">
@@ -238,11 +238,12 @@ const Rider = () => {
               </div>
               <div className="">
                 <label className="block mb-1 font-medium text-gray-700">
-                  Bike Brand Model & Year
+                  Bike Registration Number
                 </label>
                 <motion.input
-                  {...register("bikeInfo", { required: true })}
-                  placeholder="Bike Brand Model & Year"
+                  {...register("bikeRegNum", { required: true })}
+                  placeholder="Bike Registration Number"
+                  type="number"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
                   variants={inputVariant}
                   initial="hidden"
@@ -253,12 +254,11 @@ const Rider = () => {
               </div>
               <div className="">
                 <label className="block mb-1 font-medium text-gray-700">
-                  Bike Registration Number
+                  Bike Brand Model & Year
                 </label>
                 <motion.input
-                  {...register("bikeRegNum", { required: true })}
-                  placeholder="Bike Registration Number"
-                  type="number"
+                  {...register("bikeInfo", { required: true })}
+                  placeholder="Bike Brand Model & Year"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
                   variants={inputVariant}
                   initial="hidden"
@@ -291,11 +291,10 @@ const Rider = () => {
                 <label className="block mb-1 font-medium text-gray-700">
                   Tell Us about Yourself
                 </label>
-                <motion.input
+                <motion.textarea
                   {...register("riderBio", { required: true })}
                   placeholder="Tell Us about Yourself"
-                  type="text"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none h-28"
                   variants={inputVariant}
                   initial="hidden"
                   animate="visible"

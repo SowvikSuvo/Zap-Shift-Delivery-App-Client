@@ -5,7 +5,7 @@ import Logo from "../../../components/Logo";
 
 const Footer = () => {
   return (
-    <footer className="bg-[#0d0d0d] text-gray-300 py-10 px-5 rounded-3xl max-w-7xl mx-auto mt-16">
+    <footer className="bg-[#0d0d0d] text-gray-300 py-10 px-5 rounded-t-3xl max-w-7xl mx-auto mt-16">
       <div className="flex flex-col items-center space-y-6">
         {/* Logo */}
         <div className="text-3xl font-bold text-white">
