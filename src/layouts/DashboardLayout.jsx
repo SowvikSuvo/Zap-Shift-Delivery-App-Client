@@ -2,7 +2,7 @@ import React from "react";
 import { Link, NavLink, Outlet } from "react-router";
 import Logo from "../components/Logo";
 import { TbTruckDelivery } from "react-icons/tb";
-import { FaMotorcycle, FaRegCreditCard } from "react-icons/fa6";
+import { FaMotorcycle, FaRegCreditCard, FaUsers } from "react-icons/fa6";
 
 const DashboardLayout = () => {
   return (
@@ -105,6 +105,20 @@ const DashboardLayout = () => {
                 <FaMotorcycle className="my-1.5 inline-block size-4" />
 
                 <span className="is-drawer-close:hidden"> Approve Riders</span>
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                data-tip="Users Management"
+                to="/dashboard/users-management"
+              >
+                <FaUsers className="my-1.5 inline-block size-4"></FaUsers>
+
+                <span className="is-drawer-close:hidden">
+                  {" "}
+                  Users Management
+                </span>
               </NavLink>
             </li>
 
