@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 
 const AssignRiders = () => {
+  const [selectedParcel, setSelectedParcel] = useState(null);
   const axiosSecure = useAxiosSecure();
   const riderModalRef = useRef();
   const { data: parcels = [] } = useQuery({
@@ -15,9 +16,35 @@ const AssignRiders = () => {
     },
   });
 
+  const { data: riders = [] } = useQuery({
+    queryKey: ["riders", selectedParcel?.senderDistrict, "available"],
+    enabled: !!selectedParcel?.senderDistrict,
+    queryFn: async () => {
+      const res = await axiosSecure.get(
+        `/riders?status=approved&district=${selectedParcel?.senderDistrict}&workStatus=available`
+      );
+      return res.data;
+    },
+  });
+
   const openAssignRiderModal = (parcel) => {
-    riderModalRef.current.showModal();
+    setSelectedParcel(parcel);
+    console.log(parcel.senderDistrict);
+    setTimeout(() => {
+      riderModalRef.current.showModal();
+    }, 0);
   };
+
+  const handleAssignRider = (rider) => {
+    const riderAssignInfo = {
+      riderId: rider._id,
+      riderEmail: rider.email,
+      riderName: rider.name,
+      parcelId: selectedParcel._id,
+    };
+    axiosSecure.patch(``, riderAssignInfo);
+  };
+
   return (
     <div>
       <h2 className="text-5xl text-center my-5">
@@ -63,10 +90,37 @@ const AssignRiders = () => {
         className="modal modal-bottom sm:modal-middle"
       >
         <div className="modal-box">
-          <h3 className="font-bold text-lg">Hello!</h3>
-          <p className="py-4">
-            Press ESC key or click the button below to close
-          </p>
+          <h3 className="font-bold text-lg">Riders: {riders.length}</h3>
+          <div className="overflow-x-auto">
+            <table className="table table-zebra">
+              {/* head */}
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {riders.map((rider, i) => (
+                  <tr key={rider._id}>
+                    <th>{i + 1}</th>
+                    <td>{rider.name}</td>
+                    <td>{rider.email}</td>
+                    <td>
+                      <button
+                        onClick={() => handleAssignRider(rider)}
+                        className="btn btn-primary text-black"
+                      >
+                        Assign
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           <div className="modal-action">
             <form method="dialog">
               {/* if there is a button in form, it will close the modal */}
